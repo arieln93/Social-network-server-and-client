@@ -203,7 +203,6 @@ Server assumptions for example:
  * “Morty” with password “a123”
  * “Rick” with password “pain”
  * “Bird-person” with password “Gubba”
-* followings:
  * Morty follows Rick and Bird-person
  * Rick follows Bird-person
  
