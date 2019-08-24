@@ -15,7 +15,7 @@ The information is saved from the time the server starts and kept in memory unti
 Upon connecting, a client must identify himself to the service. A new client will issue a Register command with the requested user name and password. A registered client can then login using the Login command. Once the command is sent, the server will reply on the validity of the username and password. Once a user is logged in successfully, he can submit other commands.
 Note that the register command will not perform aotumatic login , the user will need to call login after it.
 
-##Supported Commands
+## Supported Commands
 The protocol supports various commands needed in order to share posts and messages. There are two types of commands, Server-to-Client and Client-to-Server.
 The commands begin with 2 bytes (short) to describe the opcode. The rest of the message will
 be defined specifically for each command as such:
@@ -127,8 +127,6 @@ pattern and not part of the protocol. It has 3 functions:
 by the given connId.
 * void broadcast(T msg) – sends a message T to all active clients. This
 includes clients that has not yet completed log-in by the BGS protocol.
-Remember, Connections<T> belongs to the server pattern
-implemenration, not the protocol!.
   * void disconnect(int connId) – removes active client connId from map.
   * ConnectionHandler<T> - A function was added to the existing interface.
   * Void send(T msg) – sends msg T to the client. Should be used by send and
@@ -147,10 +145,10 @@ connections object send function.
 ## Run commands:
 * Reactor server:
 mvn exec:java -Dexec.mainClass=”bgu.spl.net.impl.BGSServer.ReactorMain” -
-Dexec.args=”<port> <No of threads>”
+Dexec.args=”port Num_of_threads”
 * Thread per client server:
 mvn exec:java -Dexec.mainClass=”bgu.spl.net.impl.BGSServer.TPCMain” -
-Dexec.args=”<port>”
+Dexec.args=”port”
 The server directory should contain a pom.xml file and the src directory. Compilation
 will be done from the server folder using:
 mvn compile
@@ -164,7 +162,7 @@ specifications.
 The client should close itself upon reception of an ACK message in response
 of an outgoing LOGOUT command.
 The Client directory contains a src, include and bin sub directories and a Makefile. The output executable for the client is named BGSclient and should reside in the bin folder after calling make.
-* Testing run commands: BGSclient <ip> <port>
+* Testing run commands: BGSclient ip port
 
 ## Examples
 The following section contains examples of commands running on client. It assumes that the software opened a socket properly and a connection has been initiated. 
@@ -173,7 +171,8 @@ The order of commands matches order of reception in server. Server and client ac
 
 **Registeration and login**
 Server assumptions for example:
-* Server currently has 1 registered user named “Morty” with password “a123”
+ * Server currently has 1 registered user named “Morty” with password “a123”
+
 CLIENT#1< LOGIN Morty a321
 CLIENT#1> ERROR 2
 (Failed because of wrong password)
@@ -196,15 +195,18 @@ CLIENT#1> ACK 3
 CLIENT#2< LOGOUT
 CLIENT#2> ERROR 3
 (client 2 did not login)
-4.2 Following and posting / PM
+
+
+**Following and posting / PM**
 Server assumptions for example:
-• Server currently has 3 registered users:
-o “Morty” with password “a123”
-o “Rick” with password “pain”
-o “Bird-person” with password “Gubba”
-• Followings:
-o Morty follows Rick and Bird-person
-o Rick follows Bird-person
+* Server currently has 3 registered users:
+ * “Morty” with password “a123”
+ * “Rick” with password “pain”
+ * “Bird-person” with password “Gubba”
+* followings:
+ * Morty follows Rick and Bird-person
+ * Rick follows Bird-person
+ 
 CLIENT#1< LOGIN Morty a123
 CLIENT#1> ACK 2
 CLIENT#1< FOLLOW 0 2 Rick Bird-person
@@ -235,58 +237,3 @@ CLIENT#2< FOLLOW 0 2 Rick Mortneey
 CLIENT#2> ACK 4 1 Rick
 (Bird-person failed to follow Morty because he misspelled his name. Note that he
 does not receive old rick messages from before the follow)
-4.3 USERLIST \ STAT and unfollow
-Server assumptions for example:
-• Server currently has 3 registered users:
-o “Morty” with password “a123”. Registered first
-o “Rick” with password “pain”. Registered second
-o “Bird-person” with password “Gubba”. Registered third
-• Followings:
-o Morty follows Rick and Bird-person
-o Rick follows Bird-person
-• Messages:
-o Morty sent 2 posts and 3 PMs
-o Rick sent 4 posts and 2 PMs
-o Bird-person sent 1 post and 1 PM
-CLIENT#1< LOGIN Morty a123
-CLIENT#1> ACK 2
-CLIENT#1< USERLIST
-CLIENT#1> ACK 7 3 Morty Rick Bird-person
-CLIENT#1< STAT Bird-person
-CLIENT#1> ACK 8 1 2 0
-CLIENT#1< POST @bird-person I will not follow you any more, you are not social
-at all
-CLIENT#1> ACK 5
-(not one receives the post because bird person isn’t logged-in and no one follows
-Morty, when bird person logs in he should get it)
-CLIENT#1< FOLLOW 1 1 Bird-person
-CLIENT#1> ACK 4 1 Bird-person
-(Morty no longer follows bird-person and will not see his posts that do not
-contain @Morty in them from now on)
-CLIENT#1< STAT Bird-personaaaa
-CLIENT#1> ERROR 8
-(No such user Bird-personaaaa)
-CLIENT#1< LOGOUT
-CLIENT#1> ACK 3
-(client 1 closes)
-4.4 Keyboard command to packet
-In this section we will show a few keyboard commands and their matching network
-messages. Note that since network messages are just an array of bytes, we will print the
-hex values of those byte array.
-Reminder: A byte can be represented by 2 hexadecimal values (0 to f), each
-representing 4 bits of the 8 in a single byte.
-Keyboard command Message hex representation
-REGISTER Morty a123 00 01 4d 6f 72 74 79 00 61 31 32 33 00
-LOGIN Morty a123 00 02 4d 6f 72 74 79 00 61 31 32 33 00
-STAT Morty 00 08 4d 6f 72 74 79 00
-POST Nobody exists on purpose, nobody
-belongs anywhere, everybody’s gonna die.
-Come watch TV.
-00 05 4e 6f 62 6f 64 79 20 65 78 69 73
-74 73 20 6f 6e 20 70 75 72 70 6f 73 65 2c
-20 6e 6f 62 6f 64 79 20 62 65 6c 6f 6e 67
-73 20 61 6e 79 77 68 65 72 65 2c 20 65
-76 65 72 79 62 6f 64 79 e2 80 99 73 20
-67 6f 6e 6e 61 20 64 69 65 2e 20 43 6f
-6d 65 20 77 61 74 63 68 20 54 56 2e 00
-LOGOUT 00 03gith
