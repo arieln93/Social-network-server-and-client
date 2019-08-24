@@ -206,19 +206,19 @@ Server assumptions for example:
  * Morty follows Rick and Bird-person
  * Rick follows Bird-person
  
-CLIENT#1< LOGIN Morty a123
- CLIENT#1> ACK 2
-  CLIENT#1< FOLLOW 0 2 Rick Bird-person
-  CLIENT#1> ERROR 4
-  (Tried to follow users that he already follows, since both failed an error returned)
-  CLIENT#2< LOGIN Bird-person Gubba
-  CLIENT#2> ACK 2
-  CLIENT#2< POST Gubba nub nub doo rah kah
-  CLIENT#2> ACK 5
-  CLIENT#1> NOTIFICATION Public Bird-person Gubba nub nub doo rah kah
-  (Morty follows bird-person and is online so he gets the message pushed)
-  CLIENT#3< LOGIN Rick pain
-  CLIENT#3> ACK 2
+ * CLIENT#1< LOGIN Morty a123
+ * CLIENT#1> ACK 2
+ * CLIENT#1< FOLLOW 0 2 Rick Bird-person
+  * CLIENT#1> ERROR 4
+  * (Tried to follow users that he already follows, since both failed an error returned)
+  * CLIENT#2< LOGIN Bird-person Gubba
+  * CLIENT#2> ACK 2
+  * CLIENT#2< POST Gubba nub nub doo rah kah
+  * CLIENT#2> ACK 5
+  * CLIENT#1> NOTIFICATION Public Bird-person Gubba nub nub doo rah kah
+  * (Morty follows bird-person and is online so he gets the message pushed)
+  * CLIENT#3< LOGIN Rick pain
+  * CLIENT#3> ACK 2
   CLIENT#3> NOTIFICATION Public Bird-person Gubba nub nub doo rah kah
   (Rick follows Bird-person, now that he logged-in he receives messages he missed)
   CLIENT#3< PM Bird-person why aren’t you following me?
