@@ -122,17 +122,18 @@ It contains 3 interfaces:
 **Connections** – This interface should map a unique ID for each active client
 connected to the server. The implementation of Connections is part of the server
 pattern and not part of the protocol. It has 3 functions:
-**boolean send(int connId, T msg)** – sends a message T to client represented
-by the given connId
-o void broadcast(T msg) – sends a message T to all active clients. This
+* boolean send(int connId, T msg) – sends a message T to client represented
+by the given connId.
+* void broadcast(T msg) – sends a message T to all active clients. This
 includes clients that has not yet completed log-in by the BGS protocol.
 Remember, Connections<T> belongs to the server pattern
 implemenration, not the protocol!.
-o void disconnect(int connId) – removes active client connId from map.
-• ConnectionHandler<T> - A function was added to the existing interface.
-o Void send(T msg) – sends msg T to the client. Should be used by send and
+  * void disconnect(int connId) – removes active client connId from map.
+  * ConnectionHandler<T> - A function was added to the existing interface.
+  * Void send(T msg) – sends msg T to the client. Should be used by send and
 broadcast in the Connections implementation.
-• BidiMessagingProtocol – This interface replacesthe MessagingProtocol interface.
+  
+**BidiMessagingProtocol** – This interface replacesthe MessagingProtocol interface.
 It exists to support peer 2 peer messaging via the Connections interface. It
 contains 2 functions:
 o void start(int connectionId, Connections<T> connections) – initiate the
