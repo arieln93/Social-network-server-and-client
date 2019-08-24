@@ -173,28 +173,28 @@ The order of commands matches order of reception in server. Server and client ac
 Server assumptions for example:
  * Server currently has 1 registered user named “Morty” with password “a123”
 
-CLIENT#1< LOGIN Morty a321
-CLIENT#1> ERROR 2
-(Failed because of wrong password)
-CLIENT#1< LOGIN Rick a123
-CLIENT#1> ERROR 2
-(Failed because username Rick isn’t registered)
-CLIENT#1< LOGIN Morty a123
-CLIENT#1> ACK 2
-CLIENT#2< LOGIN Morty a123
-CLIENT#2> ERROR 2
-(Failed because Morty is already logged-in)
-CLIENT#2< USERLIST
-CLIENT#2> ERROR 7
-(Failed because client #2 isn’t logged in)
-CLIENT#2< REGISTER Rick pain
-CLIENT#2> ACK 1
-CLIENT#1< LOGOUT
-CLIENT#1> ACK 3
-(client 1 closes)
-CLIENT#2< LOGOUT
-CLIENT#2> ERROR 3
-(client 2 did not login)
+ CLIENT#1< LOGIN Morty a321
+ CLIENT#1> ERROR 2
+ (Failed because of wrong password)
+ CLIENT#1< LOGIN Rick a123
+ CLIENT#1> ERROR 2
+ (Failed because username Rick isn’t registered)
+ CLIENT#1< LOGIN Morty a123
+ CLIENT#1> ACK 2
+ CLIENT#2< LOGIN Morty a123
+ CLIENT#2> ERROR 2
+ (Failed because Morty is already logged-in)
+ CLIENT#2< USERLIST
+ CLIENT#2> ERROR 7
+ (Failed because client #2 isn’t logged in)
+ CLIENT#2< REGISTER Rick pain
+ CLIENT#2> ACK 1
+ CLIENT#1< LOGOUT
+ CLIENT#1> ACK 3
+ (client 1 closes)
+ CLIENT#2< LOGOUT
+ CLIENT#2> ERROR 3
+ (client 2 did not login)
 
 
 **Following and posting / PM**
@@ -207,32 +207,29 @@ Server assumptions for example:
  * Rick follows Bird-person
  
 CLIENT#1< LOGIN Morty a123
-CLIENT#1> ACK 2
-CLIENT#1< FOLLOW 0 2 Rick Bird-person
-CLIENT#1> ERROR 4
-(Tried to follow users that he already follows, since both failed an error returned)
-CLIENT#2< LOGIN Bird-person Gubba
-CLIENT#2> ACK 2
-CLIENT#2< POST Gubba nub nub doo rah kah
-CLIENT#2> ACK 5
-CLIENT#1> NOTIFICATION Public Bird-person Gubba nub nub doo rah kah
-(Morty follows bird-person and is online so he gets the message pushed)
-CLIENT#3< LOGIN Rick pain
-CLIENT#3> ACK 2
-CLIENT#3> NOTIFICATION Public Bird-person Gubba nub nub doo rah kah
-(Rick follows Bird-person, now that he logged-in he receives messages he missed)
-CLIENT#3< PM Bird-person why aren’t you following me?
-CLIENT#3> ACK 6
-CLIENT#2> NOTIFICATION PM Rick why aren’t you following me?
-(Bird-person is online and was sent a PM, it is pushed right away to him)
-CLIENT#3< POST wubba lubba dub dub @Bird-person is not following me
-CLIENT#3> ACK 5
-CLIENT#1> NOTIFICATION Public Rick wubba lubba dub dub @Bird-person is not
-following me
-CLIENT#2> NOTIFICATION Public Rick wubba lubba dub dub @Bird-person is not
-following me
-(Bird-person receives rick’s latest post because his @username appears in it)
-CLIENT#2< FOLLOW 0 2 Rick Mortneey
-CLIENT#2> ACK 4 1 Rick
-(Bird-person failed to follow Morty because he misspelled his name. Note that he
-does not receive old rick messages from before the follow)
+ CLIENT#1> ACK 2
+  CLIENT#1< FOLLOW 0 2 Rick Bird-person
+  CLIENT#1> ERROR 4
+  (Tried to follow users that he already follows, since both failed an error returned)
+  CLIENT#2< LOGIN Bird-person Gubba
+  CLIENT#2> ACK 2
+  CLIENT#2< POST Gubba nub nub doo rah kah
+  CLIENT#2> ACK 5
+  CLIENT#1> NOTIFICATION Public Bird-person Gubba nub nub doo rah kah
+  (Morty follows bird-person and is online so he gets the message pushed)
+  CLIENT#3< LOGIN Rick pain
+  CLIENT#3> ACK 2
+  CLIENT#3> NOTIFICATION Public Bird-person Gubba nub nub doo rah kah
+  (Rick follows Bird-person, now that he logged-in he receives messages he missed)
+  CLIENT#3< PM Bird-person why aren’t you following me?
+  CLIENT#3> ACK 6
+  CLIENT#2> NOTIFICATION PM Rick why aren’t you following me?
+  (Bird-person is online and was sent a PM, it is pushed right away to him)
+  CLIENT#3< POST wubba lubba dub dub @Bird-person is not following me
+  CLIENT#3> ACK 5
+  CLIENT#1> NOTIFICATION Public Rick wubba lubba dub dub @Bird-person is not following me
+  CLIENT#2> NOTIFICATION Public Rick wubba lubba dub dub @Bird-person is not following me
+  (Bird-person receives rick’s latest post because his @username appears in it)
+  CLIENT#2< FOLLOW 0 2 Rick Mortneey
+  CLIENT#2> ACK 4 1 Rick
+  (Bird-person failed to follow Morty because he misspelled his name. Note that he does not receive old rick messages from before the follow)
