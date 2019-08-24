@@ -119,6 +119,7 @@ If the FOLLOW command failed for all users on the list (I.e. number of succesful
 ## Server
 There is a single protocol, supporting both the Thread-Per-Client and Reactor server patterns.
 It contains 3 interfaces:
+
 **Connections** – This interface should map a unique ID for each active client
 connected to the server. The implementation of Connections is part of the server
 pattern and not part of the protocol. It has 3 functions:
@@ -136,107 +137,43 @@ broadcast in the Connections implementation.
 **BidiMessagingProtocol** – This interface replacesthe MessagingProtocol interface.
 It exists to support peer 2 peer messaging via the Connections interface. It
 contains 2 functions:
-o void start(int connectionId, Connections<T> connections) – initiate the
+* void start(int connectionId, Connections<T> connections) – initiate the
 protocol with the active connections structure of the server and saves the
 owner client’s connection id.
-o void process(T message) – As in MessagingProtocol, processes a given
+ * void process(T message) – As in MessagingProtocol, processes a given
 message. Unlike MessagingProtocol, responses are sent via the
 connections object send function.
-Left to you, are the following tasks:
-1. Implement Connections<T> to hold a list of the new ConnectionHandler interface
-for each active client. Use it to implement the interface functions. Notice that
-given a connections implementation, any protocol should run. This means that you
-keep your implementation of Connections on T.
-public class ConnectionsImpl<T> implements Connections<T> {…}.
-2. Refactor the Thread-Per-Client server to support the new interfaces. The
-ConnectionHandler should implement the new interface. Add calls for the new
-Connections<T> interface. Notice that the ConnectionHandler<T> should now
-work with the BidiMessagingProtocol<T> interface instead of
-MessagingProtocol<T>.
-3. Refactor the Reactorserver to support the new interfaces. The ConnectionHandler
-should implement the new interface. Add calls for the new Connections<T>
-interface. Notice that the ConnectionHandler<T> should now work with the
-BidiMessagingProtocol<T> interface instead of MessagingProtocol<T>.
-4. Tasks 1 to 3 MUST not be specific for the protocol implementation. Implement
-the new BidiMessagingProtocol and MessageEncoderDecoder to support the BGS
-protocl as described in section 1.2. You will also need to define messages(<T> in
-the interfaces). You may add more classes as neccesery to implement the protocol
-(shared protocol data ect…).
-Leading questions:
-• Which classes and interfaces are part of the Server pattern and which are part of
-the Protocol implementation?
-• When and how do I register a new connection handler to the Connections
-interface implementation?
-• When do I call start to initiate the connections list? Start must end before any call
-to Process occurs. What are the implications on the reactor? (Note: start cannot
-be called by the main reactor thread and must run before the first )
-• How do you collect a message? Are all message types collected the same way?
-Tips:
-• You can test tasks 1 – 3 by fixing one of the examples in the impl folder in the
-supplied spl-net.zip to work with the new interfaces (easiest is the echo example)
-• You can complete tasks 1 and 2, proceed to 4 and return to the reactor code later.
-Thread per client implementation will be enough for testing purposes.
-• The BGS protocol will require a shared object between client protocol 
-implementation. You can transfer it in the constructor using the protocol factory.
-(as seen in NewsFeedServerMain.java in the examples). This means you will also
-need to consider synchronization from multiple clients working on the data
-structures at the same time.
-Testing run commands:
-• Reactor server:
+
+## Run commands:
+* Reactor server:
 mvn exec:java -Dexec.mainClass=”bgu.spl.net.impl.BGSServer.ReactorMain” -
 Dexec.args=”<port> <No of threads>”
-• Thread per client server:
+* Thread per client server:
 mvn exec:java -Dexec.mainClass=”bgu.spl.net.impl.BGSServer.TPCMain” -
 Dexec.args=”<port>”
 The server directory should contain a pom.xml file and the src directory. Compilation
 will be done from the server folder using:
 mvn compile
-2.3 Client
-An echo client is provided, but its a single threaded client. While it is blocking on stdin
-(read from keyboard) it does not read messages from the socket. You should improve the
-client so that it will run 2 threads. One should read from keyboard while the other should
-read from socket. The client should receive the server’s IP and PORT as arguments. You
-may assume a network disconnection does not happen (like disconnecting the network
-cable). You may also assume legel input via keyboard.
+
+## Client
+The client run 2 threads. One is reading from keyboard while the other is reading from socket. The client should receive the server’s IP and PORT as arguments.
 The client should recive commands using the standard input. Commands are defined in
 section 1.2 under command initiation sub sections. You will need to translate from
 keyboard command to network messages and the other way around to fit the
 specifications.
-Notice that the client should close itself upon reception of an ACK message in response
+The client should close itself upon reception of an ACK message in response
 of an outgoing LOGOUT command.
-The Client directory should contain a src, include and bin subdirectories and a Makefile
-as shown in class. The output executable for the client is named BGSclient and should
-reside in the bin folder after calling make.
-Testing run commands: BGSclient <ip> <port>
-3 Submission instruction
-• Submission is done only in pairs. If you do not have a pair, find one. You need
-explicit authorization from the course staff to submit without a pair. You cannot
-submit in a group larger than two.
-• You must submit one .tar.gz file with all your code. The file should be named
-"ID#1_ID#2.tar.gz". Note: We require you to use a .tar.gz file. Files such as .rar,
-.zip, .bz, or anything else which is not a .tar.gz file will not be accepted and your
-grade will suffer.
-• Extension requests are to be sent to majeed. Your request email must include the
-following information:
-- Your name and your partners name.
-- Your id and your partners id.
-- Explanation regarding the reason of the extension request.
-- Offcial certification for your illness or army drafting.
-Requests without a compelling reason will not be accepted
-• The submitted file should contain a Client directory and a Server directory (Their
-content was explained in the implementation section).
-4 Examples
-The following section contains examples of commands running on client. It assumes that
-the software opened a socket properly and a connection has been initiated.
-We use “CLIENT#No<” and “CLIENT#No>” to annotate client #No terminal input
-(keyboard) \ output (screen print). The order of commands matches order of reception
-in server. Server and client actions are explained in between.
-Note that the examples do not show the actual structure of the network messages, just
-the input \ output on the client terminal. The translation should be done according to
-specifications in section 1.2.
-4.1 Registeration and login
+The Client directory contains a src, include and bin sub directories and a Makefile. The output executable for the client is named BGSclient and should reside in the bin folder after calling make.
+* Testing run commands: BGSclient <ip> <port>
+
+## Examples
+The following section contains examples of commands running on client. It assumes that the software opened a socket properly and a connection has been initiated. 
+We use “CLIENT#No<” and “CLIENT#No>” to annotate client #No terminal input (keyboard) \ output (screen print).
+The order of commands matches order of reception in server. Server and client actions are explained in between.
+
+**Registeration and login**
 Server assumptions for example:
-• Server currently has 1 registered user named “Morty” with password “a123”
+* Server currently has 1 registered user named “Morty” with password “a123”
 CLIENT#1< LOGIN Morty a321
 CLIENT#1> ERROR 2
 (Failed because of wrong password)
