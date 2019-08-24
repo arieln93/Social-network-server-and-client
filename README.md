@@ -5,7 +5,7 @@ A registered user will be able to follow other users and post messages.
 The server is also supporting send messages between clients, or broadcast an announcment to a group of clients (push
 notifications).
 
-The BGS (Ben Gurion Social) Protocol will emulate a simple social network. Users need to register to the service. Once registered, they will be able to post messages and follow other users. It is a binary protocol that uses pre defined message
+The protocol will emulate a simple social network. Users need to register to the service. Once registered, they will be able to post messages and follow other users. It is a binary protocol that uses pre defined message
 length for different commands. The commands are defined by an opcode, a short number
 at the start of each message. For each command, a different length of data needs to be
 read according to it’s specifications.
@@ -37,6 +37,8 @@ The protocol supports 11 types of messages:
 |9	|Notification (NOTIFICATION)		|
 |10	|Ack (ACK)				|
 |11	|Error (ERROR)				|
+
+## Example opcodes explenation:
 
 **REGISTER Messages:**
 
@@ -113,197 +115,14 @@ Messages have the following format:
 Messages that appear only in a Client-to-Server communication. A FOLLOW message allows a user to add/remove other users to/from his follow list. The user names inside the UserNameList parameter are seperated by a zero byte, and this
 parameter ends with a terminating zero byte.
 If the FOLLOW command failed for all users on the list (I.e. number of succesfull un/follows = 0) an ERROR message will be sent back to the client.
-The user must be logged in, otherwise an ERROR message will be sent.
-For a follow command to succeed, a user on the list must not already be on the following
-list of the logged in user. (The opposite also applys for the unfollow command).
-The ack for this command will contain the number of successful follows/unfollows and
-the corresponding user names. The user names inside the UserNameList parameter are
-seperated by a zero byte, and this parameter ends with a terminating zero byte. (Those
-will appear in the optional per command section of the ACK message).
-The ACK message will have the following form:
 
-> ACK-Opcode FOLLOW-Opcode n <username1> … <username n>
-2 bytes 2 bytes 2 bytes String 1 byte
-ACK Opcode FOLLOW
-Opcode
-NumOfUsers UserNameList 0
-Parameters:
-• Opcode: 4.
-• Follow/Unfollow: This parameter has a value of 0 when a user wants to follow,
-otherwise it has a value of 1(Unfollow).
-• NumOfUsers: The amount of users on the follow/unfollow list.
-• UserNameList: The requested user names list to follow/unfollow.
-Command initiation:
-• This command is initiated by entering the following texts in the client command
-line interface:
-FOLLOW <0/1 (Follow/Unfollow)> <NumberOfUsers> <UserName_1> … <UserName_n>
-
-
-**POST Messages:**
-Messages have the following format:
-2 bytes String 1 byte
-Opcode Content 0
-Messages that appear only in a Client-to-Server communication. A post message allows
-a user to share messages with other users.
-The Content parameter is a sequence of bytes in UTF-8.
-All posts should be saved to a data structure in the server, along with PM messages. A 
-post message will be sent to users who are listed with a “@username” inside the message
-(if username is registered in the system) and to users following the user who posted the
-message.
-In order to send a POST message the user must be logged in, otherwise an ERROR message
-will be returned to the client.
-Parameters:
-• Opcode: 5.
-• Content: The content of the message a user wants to post. The message may
-contain @<username> in order to send it to specific users other then those
-following the poster.
-
-Command initiation:
-• This command is initiated by entering the following texts in the client command
-line interface:
-POST <PostMsg>
-
-**PM Messages:**
-Messages have the following format:
-2 bytes String 1 byte String 1 byte
-Opcode UserName 0 Content 0
-Messages that appear only in a Client-to-Server communication.
-PM message is used to sent private messages to another user.
-Both string parameters are a sequence of bytes in UTF-8 terminated by a zero byte.
-In order to send a PM message the sending user must be logged in, otherwise an ERROR
-message will be returned to the client.
-If the reciepient username isn’t registered an ERROR message will be returned to the
-client.
-@<userName> isn’t applicable for private messages.
-All pm messages should be saved to a data structure in the application, along with post
-messages.
-Parameters:
-• Opcode: 6.
-• UserName: The user to send the message to.
-• Content: The content of the message the logged in user wants to send to the other
-user.
-Command initiation:
-• This command is initiated by entering the following texts in the client command
-line interface:
-PM <UserName> <Content>
-USERLIST Messages:
-Messages have the following format:
-2 bytes
-Opcode
-A USERLIST message is used to recieve a list of all registered users.
-Messages that appear only in a Client-to-Server communication.
-In order to send a USERLIST message the user must be logged in, otherwise an ERROR
-message will be returned to the client.
-The ACK message for this command will contain the number of users, and a list of
-UserNames seperated by zero bytes ending with a zero byte in the optional section. The
-list is ordered by registration order.
-Example:
-ACK-Opcode USERLIST-Opcode n <UserName 1> … <UserName n>
-2 bytes 2 bytes 2 bytes String 1 byte
-ACK Opcode USERLIST Opcode NumOfUsers UserNameList 0
-Parameters:
-• Opcode: 7.
-Command initiation:
-• This command is initiated by entering the following texts in the client command
-line interface: USERLIST
-STAT Messages:
-Messages have the following format:
-2 bytes String 1 byte
-Opcode UserName 0
-A STAT message is used to recieve data on a certain user (number of posts a user posted,
-number of followers, number of users the user is following).
-The UserName parameter are a sequence of bytes in UTF-8 terminated by a zero byte.
-Messages that appear only in a Client-to-Server communication.
-In order to send a STAT message the user must be logged in, otherwise an ERROR message
-will be returned to the client.
-If userName is not registered, an error message will be returned.
-The returned ACK message will contain number of posts a user posted (not including
-PM’s), number of followers, number of users the user is following in the optional section
-of the ACK message.
-Example:
-ACK-Opcode USERLIST-Opcode <NumPosts> <NumFollowers> <NumFollowing>
-2 bytes 2 bytes 2 bytes 2 bytes 2 bytes
-ACK Opcode STAT Opcode NumPosts NumFollowers NumFollowing
-Parameters:
-• Opcode: 8.
-• UserName: The User Name whose stats will be returned to the client.
-Command initiation:
-• This command is initiated by entering the following texts in the client command
-line interface: STAT <userName>
-NOTIFICATION Messages:
-Messages have the following format:
-2 bytes 1 byte String 1 byte String 1 byte
-Opcode NotificationType - PM/Public PostingUser 0 Content 0
-Messages that appear only in a Server-to-Client communication. This message will be sent
-from the server for any PM sent to the user, post sent by someone the user is following,
-or a post that contained @<MyUserName> in the content of a message.
-Both string parameters are a sequence of bytes in UTF-8 terminated by a zero byte.
-A user will recive any POST/PM notification sent after follow (for users the current user is
-following) that he didn’t see. I.e. wasn’t logged in when the other user posted/sent the
-message. (Clue: for each user, save timestamp of last message recieved from each of the
-other users / timestamp of the follow command)
-Parameters:
-• Opcode: 9.
-• NotificationType : indicates whether the message is a PM message (0) or a public
-message (post) (1).
-• PostingUser: The user who poster/sent the message.
-• Content: The message that was posted/sent.
-Client screen output:
-• Any NOTIFICATION message received in client sould be written to the screen:
-NOTIFICATION <”PM”/”Public”> <PostingUser> <Content>
-ACK Messages:
-Messages have the following format:
-2 bytes 2 bytes -
-Opcode Message Opcode Optional
-Messages that appear only in a Server-to-Client communication.
-ACK Messages are used to acknowledge different Messages. Each ACK contains the
-message number for which the ack was sent. In the optional section there will be
-additional data for some of the Messages (if a message uses the optional section it will be
-specified under the message description).
-All Messages that appear in a Client-to-Server communication require an ack/error
-message in response.
-Parameters:
-• Opcode: 10.
-• Message Opcode: The message opcode the ACK was sent for.
-• Optional: changes for each message.
-Client screen output:
-• Any ACK message received in client sould be written to the screen:
-ACK <Message Opcode> <Optional>
-• Printing of the optional part:
-o Multi-parameter optional sections should be split by space and printed by
-order of the ack response
-o Short should be printed as numbers
-o String lists should be seperated by a space
-ERROR Messages:
-Messages have the following format:
-2 bytes 2 bytes
-Opcode Message Opcode
-Messages that appear only in a Server-to-Client communication.
-An ERROR message may be the acknowledgment of any other type of message. In case of
-error, an error message should be sent.
-Parameters:
-• Opcode: 11.
-• Message Opcode: The message opcode the ERROR was sent for.
-Error Notification:
-• Any error message received in client should be written to screen:
-ERROR <Message Opcode>
-2 Implementation Details
-2.1 General Guidelines
-• The server should be written in Java. The client should be written in C++ with
-BOOST. Both should be tested on Linux installed at CS computer labs.
-• You must use maven as your build tool for the server and MakeFile for the c++
-client.
-• The same coding standards expected in the course and previous assignments are
-expected here.
-2.2 Server
-You will have to implement a single protocol, supporting both the Thread-Per-Client and
-Reactor server patterns presented in class. Code seen in class for both servers is included
-in the assignment wiki page. You are also provided with 3 new or changed interfaces:
-• Connections – This interface should map a unique ID for each active client
+## Server
+There is a single protocol, supporting both the Thread-Per-Client and Reactor server patterns.
+It contains 3 interfaces:
+**Connections** – This interface should map a unique ID for each active client
 connected to the server. The implementation of Connections is part of the server
-pattern and not part of the protocol. It has 3 functions that you must implement
-(You may add more if needed):
-o boolean send(int connId, T msg) – sends a message T to client represented
+pattern and not part of the protocol. It has 3 functions:
+**boolean send(int connId, T msg)** – sends a message T to client represented
 by the given connId
 o void broadcast(T msg) – sends a message T to all active clients. This
 includes clients that has not yet completed log-in by the BGS protocol.
